@@ -6,6 +6,7 @@
 
 ## 📌 Repository Link
 **⭐ Source Code on GitHub:** [https://github.com/soumyadarshandash0001-gif/Bharat-Health-AI](https://github.com/soumyadarshandash0001-gif/Bharat-Health-AI)
+**🚀 Live Demo (Chatbot):** [https://soumyadarshandash0001-gif.github.io/Bharat-Health-AI/](https://soumyadarshandash0001-gif.github.io/Bharat-Health-AI/)
 
 ## 🏗️ Architecture
 
