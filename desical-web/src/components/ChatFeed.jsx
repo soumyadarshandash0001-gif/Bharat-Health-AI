@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { Zap, CloudSun, Thermometer, Wind } from 'lucide-react';
+import { Zap, CloudSun, Thermometer, Wind, BrainCircuit } from 'lucide-react';
 import { t } from '../utils/i18n';
 import SuggestedPrompts from './SuggestedPrompts';
+import Typewriter from './Typewriter';
 
 const WeatherBanner = ({ weather }) => {
   if (!weather) return null;
@@ -123,7 +124,13 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
             ) : (
               <>
                 {msg.persona && msg.role === 'ai' && <PersonaBadge persona={msg.persona} />}
-                <div className="msg-content">{msg.content}</div>
+                <div className="msg-content">
+                  {msg.role === 'ai' && idx === messages.length - 1 ? (
+                    <Typewriter text={msg.content} speed={12} />
+                  ) : (
+                    msg.content
+                  )}
+                </div>
                 {msg.weather && <WeatherBanner weather={msg.weather} />}
                 {msg.sources && msg.sources.length > 0 && (
                   <>

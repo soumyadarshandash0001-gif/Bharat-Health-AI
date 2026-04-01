@@ -16,20 +16,20 @@ import { getLocalWeather, getWeatherAdvice } from './weather';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-const SUGGESTION_POOL = [
-  "How much protein is in paneer?",
-  "Is masala dosa good for diabetes?",
-  "What are healthy foods in Odisha?",
-  "I am feeling tired, what to eat?",
-  "Suggest a budget weight loss plan",
-  "Calculate macros for 2 idli 1 dosa",
-  "How to stay consistent with my diet?",
-  "Healthy lunch ideas for summer",
-  "Best high protein veg breakfast"
-];
-
-function getRandomSuggestions(count = 3) {
-  return [...SUGGESTION_POOL].sort(() => 0.5 - Math.random()).slice(0, count);
+function getRandomSuggestions(intent, weather) {
+  const pools = {
+    general: ["How much protein is in paneer?", "What are healthy foods in Odisha?", "Suggest a budget diet plan"],
+    weight: ["How to lose 5kg in a month?", "Low calorie Indian snacks", "Walking vs Gym for fat loss"],
+    fitness: ["Best pre-workout Indian food", "How to hit 100g protein (veg)?", "Creatine info for beginners"],
+    medical: ["Safe fruits for diabetes", "HBA1C test info", "Diet for high blood pressure"],
+    symptom: ["Home remedies for bloating", "Cold relief khichdi recipe", "Drinks for instant energy"],
+    climate: ["Summer cooling drinks", "Immunity tea for rain", "Warm winter breakfast"]
+  };
+  
+  let pool = pools[intent] || pools.general;
+  if (weather?.type === 'cooling') pool = [...pool, ...pools.climate];
+  
+  return [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
 }
 
 // ═══════════════════════════════════════
@@ -102,18 +102,29 @@ function findExactFood(query) {
 
 function detectMultipleFoods(query) {
   const q = query.toLowerCase();
-  const matches = [...q.matchAll(/(\d+)\s*([a-z]+)/g)];
   const found = [];
 
+  // Pattern 1: "2 idli 1 dosa"
+  const matches = [...q.matchAll(/(\d+)\s*([a-z]+)/g)];
   for (const match of matches) {
     const qty = parseInt(match[1]);
     const word = match[2];
-    
-    // Find food
     for (const [key, food] of Object.entries(FOODS)) {
       if (key.includes(word) || food.name.toLowerCase().includes(word)) {
         found.push({ qty, food });
         break;
+      }
+    }
+  }
+
+  // Pattern 2: "idli and dosa and sambar" (no quantities)
+  if (found.length === 0) {
+    for (const [key, food] of Object.entries(FOODS)) {
+      const cleanKey = key.replace(/_/g, ' ');
+      if (q.includes(cleanKey) || q.includes(food.name.toLowerCase())) {
+        if (!found.find(f => f.food.name === food.name)) {
+          found.push({ qty: 1, food });
+        }
       }
     }
   }
@@ -248,7 +259,7 @@ export async function chat(question, language = 'en') {
     ...response, 
     intent, 
     persona, 
-    suggestions: getRandomSuggestions(3),
+    suggestions: getRandomSuggestions(intent, weatherAdvice),
     weather: weatherAdvice 
   };
 
