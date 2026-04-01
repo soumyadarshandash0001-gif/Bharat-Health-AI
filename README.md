@@ -1,11 +1,11 @@
 # 🥗 Bharat Health AI — Cognitive Indian Diet Coach
 > AI-powered nutrition companion for Indian food. Track calories, get personalized meal plans, manage diabetes, and calculate **multi-food macros instantly** — all powered by a local RAG engine with 8,000+ Indian food entries.
 
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue.svg)](https://github.com/soumyadarshandash/Bharat-Health-AI)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue.svg)](https://github.com/soumyadarshandash0001/Bharat-Health-AI)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 ## 📌 Repository Link
-**⭐ Source Code on GitHub:** [https://github.com/soumyadarshandash/Bharat-Health-AI](https://github.com/soumyadarshandash/Bharat-Health-AI)
+**⭐ Source Code on GitHub:** [https://github.com/soumyadarshandash0001/Bharat-Health-AI](https://github.com/soumyadarshandash0001/Bharat-Health-AI)
 
 ## 🏗️ Architecture
 
