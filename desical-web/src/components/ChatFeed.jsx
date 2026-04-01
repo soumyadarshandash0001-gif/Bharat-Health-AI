@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Zap, BrainCircuit, Heart, Activity } from 'lucide-react';
+import { Zap, BrainCircuit, Heart, Activity, CloudSun } from 'lucide-react';
 import { t } from '../utils/i18n';
 import SuggestedPrompts from './SuggestedPrompts';
 import Typewriter from './Typewriter';
@@ -128,6 +128,24 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
 
   return (
     <div className="chat-area" ref={feedRef}>
+      {messages.some(m => m.weather) && (
+        <div className="sticky top-0 z-10 px-4 py-2 bg-gradient-to-r from-bg-primary/95 to-bg-secondary/95 backdrop-blur-md rounded-2xl border border-white/5 flex items-center justify-between shadow-xl mb-4 animate-in fade-in slide-in-from-top-4 duration-700">
+           <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-500">
+                <CloudSun size={18} />
+             </div>
+             <div>
+               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Room Status • Live Climate</p>
+               <p className="text-xs font-bold text-slate-200">
+                 {messages.findLast(m => m.weather)?.weather.city || 'India'} • {messages.findLast(m => m.weather)?.weather.temp}°C
+               </p>
+             </div>
+           </div>
+           <div className="px-3 py-1 rounded-full bg-primary-500/10 text-[10px] font-bold text-primary-500 uppercase">
+             {messages.findLast(m => m.weather)?.weather.condition}
+           </div>
+        </div>
+      )}
       {messages.map((msg, idx) => (
         <div key={idx} className={`msg ${msg.role}`}>
           <div className="msg-avatar">

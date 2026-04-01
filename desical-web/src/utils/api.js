@@ -29,18 +29,22 @@ function getRelevantReminders(intent) {
 
 function getRandomSuggestions(intent, weather) {
   const pools = {
-    general: ["How much protein is in paneer?", "What are healthy foods in Odisha?", "Suggest a budget diet plan"],
-    weight: ["How to lose 5kg in a month?", "Low calorie Indian snacks", "Walking vs Gym for fat loss"],
-    fitness: ["Best pre-workout Indian food", "How to hit 100g protein (veg)?", "Creatine info for beginners"],
-    medical: ["Safe fruits for diabetes", "HBA1C test info", "Diet for high blood pressure"],
-    symptom: ["Home remedies for bloating", "Cold relief khichdi recipe", "Drinks for instant energy"],
-    climate: ["Summer cooling drinks", "Immunity tea for rain", "Warm winter breakfast"]
+    general: ["Help me stay consistent", "What's my next healthy step?", "Suggest a quick 5-min habit"],
+    weight: ["Am I eating too little?", "Is it okay to have a cheat meal?", "How to track progress properly?"],
+    fitness: ["Correct way to do a pushup?", "Better form for squats?", "Post-workout stretch guide"],
+    medical: ["When to see a doctor?", "How to track sugar at home?", "Alternative foods for fiber"],
+    symptom: ["Feeling heavy, what helps?", "Natural energy boosters", "Breathing for stress relief"],
+    climate: ["Hydration goal for today?", "Best soup for this weather", "Clothes for morning walk"]
   };
   
   let pool = pools[intent] || pools.general;
   if (weather?.type === 'cooling') pool = [...pool, ...pools.climate];
   
-  return [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
+  // Mix in 1 general supportive prompt if needed
+  const mixed = [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
+  if (mixed.length < 3) mixed.push(pools.general[0]);
+  
+  return mixed;
 }
 
 // ═══════════════════════════════════════
