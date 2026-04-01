@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Zap, CloudSun, Thermometer, Wind, BrainCircuit } from 'lucide-react';
 import { t } from '../utils/i18n';
 import SuggestedPrompts from './SuggestedPrompts';
@@ -74,12 +74,27 @@ const PersonaBadge = ({ persona }) => {
 
 const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
   const feedRef = useRef(null);
+  const [analyzingIndex, setAnalyzingIndex] = useState(-1);
+
+  useEffect(() => {
+    if (loading) {
+      setAnalyzingIndex(-1);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].role === 'ai') {
+      setAnalyzingIndex(messages.length - 1);
+      const timer = setTimeout(() => setAnalyzingIndex(-1), 1500); // Analysis time
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length]);
 
   useEffect(() => {
     if (feedRef.current) {
       feedRef.current.scrollTo({ top: feedRef.current.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages, loading]);
+  }, [messages, loading, analyzingIndex]);
 
   // Welcome screen
   if (messages.length === 0 && !loading) {
@@ -125,10 +140,17 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
               <>
                 {msg.persona && msg.role === 'ai' && <PersonaBadge persona={msg.persona} />}
                 <div className="msg-content">
-                  {msg.role === 'ai' && idx === messages.length - 1 ? (
-                    <Typewriter text={msg.content} speed={12} />
+                  {idx === analyzingIndex ? (
+                    <div className="flex items-center gap-2 text-primary-500 font-medium animate-pulse py-2">
+                       <BrainCircuit className="animate-spin-slow" size={20} />
+                       <span>Analyse time: Consulting Cognitive Engine...</span>
+                    </div>
                   ) : (
-                    msg.content
+                    msg.role === 'ai' && idx === messages.length - 1 ? (
+                      <Typewriter text={msg.content} speed={12} />
+                    ) : (
+                      msg.content
+                    )
                   )}
                 </div>
                 {msg.weather && <WeatherBanner weather={msg.weather} />}
