@@ -1,6 +1,35 @@
 import React, { useEffect, useRef } from 'react';
-import { Zap } from 'lucide-react';
+import { Zap, CloudSun, Thermometer, Wind } from 'lucide-react';
 import { t } from '../utils/i18n';
+import SuggestedPrompts from './SuggestedPrompts';
+
+const WeatherBanner = ({ weather }) => {
+  if (!weather) return null;
+  const colors = { 
+    comfort: 'bg-indigo-50/50 border-indigo-100 text-indigo-700',
+    cooling: 'bg-blue-50/50 border-blue-100 text-blue-700',
+    warming: 'bg-orange-50/50 border-orange-100 text-orange-700',
+    balanced: 'bg-emerald-50/50 border-emerald-100 text-emerald-700'
+  };
+  
+  return (
+    <div className={`weather-banner flex items-center gap-3 p-3 rounded-xl border mb-3 animate-in fade-in zoom-in duration-500 ${colors[weather.type] || colors.balanced}`}>
+      <div className="p-2 bg-white/80 rounded-lg shadow-sm">
+        <CloudSun size={18} />
+      </div>
+      <div>
+        <p className="text-sm font-medium leading-tight">{weather.text}</p>
+        <div className="flex gap-2 mt-1">
+          {weather.tags.map((tag, i) => (
+            <span key={i} className="text-[10px] uppercase font-bold tracking-tighter opacity-70">
+               • {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const NutritionCard = ({ sources }) => {
   if (!sources || sources.length === 0) return null;
@@ -95,6 +124,7 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
               <>
                 {msg.persona && msg.role === 'ai' && <PersonaBadge persona={msg.persona} />}
                 <div className="msg-content">{msg.content}</div>
+                {msg.weather && <WeatherBanner weather={msg.weather} />}
                 {msg.sources && msg.sources.length > 0 && (
                   <>
                     <div className="msg-sources">
@@ -106,6 +136,9 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
                     </div>
                     <NutritionCard sources={msg.sources} />
                   </>
+                )}
+                {msg.role === 'ai' && idx === messages.length - 1 && (
+                  <SuggestedPrompts suggestions={msg.suggestions} onSelect={onQuickAction} />
                 )}
                 <div className="msg-meta">
                   {msg.model && <span>⚡ {msg.model}</span>}

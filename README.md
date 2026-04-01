@@ -94,6 +94,12 @@ Health_web/
 - **Multi-language**: Full UI + AI responses in English, Hindi, Tamil, and Odia.
 - **Voice Input**: Browser speech recognition built-in.
 
+## 🚀 Elite Cognitive Upgrades (New!)
+- **Dynamic Suggested Prompts**: Smart follow-up questions after every AI response for easier navigation.
+- **Climate-Aware Recommendations**: Integrated **wttr.in** API to provide food advice based on live weather (e.g., cooling drinks for heatwaves, warm soups for rainy days).
+- **Health Reminders**: Built-in system for water and meal timing notifications.
+- **Full State Search**: Search functionality expanded across all Indian states with GI-based healthy vs. unhealthy grading.
+
 ## ☁️ Deployment
 
 ### Frontend → GitHub Pages

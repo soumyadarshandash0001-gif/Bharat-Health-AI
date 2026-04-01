@@ -12,8 +12,25 @@
 import { buildContext, addSessionMessage, trackIssues, getRecurringIssues } from './memory';
 import { classifyIntent, detectState, decideMode } from './intent';
 import { calculateHealthScores } from './scoring';
+import { getLocalWeather, getWeatherAdvice } from './weather';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const SUGGESTION_POOL = [
+  "How much protein is in paneer?",
+  "Is masala dosa good for diabetes?",
+  "What are healthy foods in Odisha?",
+  "I am feeling tired, what to eat?",
+  "Suggest a budget weight loss plan",
+  "Calculate macros for 2 idli 1 dosa",
+  "How to stay consistent with my diet?",
+  "Healthy lunch ideas for summer",
+  "Best high protein veg breakfast"
+];
+
+function getRandomSuggestions(count = 3) {
+  return [...SUGGESTION_POOL].sort(() => 0.5 - Math.random()).slice(0, count);
+}
 
 // ═══════════════════════════════════════
 // 🗃️ EXPANDED FOOD DATABASE
@@ -219,19 +236,30 @@ export async function chat(question, language = 'en') {
 
   if (backendData) {
     addSessionMessage('ai', backendData.response);
-    return { ...backendData, intent, persona };
+    return { ...backendData, intent, persona, suggestions: getRandomSuggestions(3) };
   }
 
   // Expert fallback
-  const response = generateExpertResponse(question, language, intent, mode, profile, context);
-  addSessionMessage('ai', response.response);
-  return { ...response, intent, persona };
+  const weather = await getLocalWeather(profile.location || 'India');
+  const weatherAdvice = getWeatherAdvice(weather);
+  
+  const response = generateExpertResponse(question, language, intent, mode, profile, context, weatherAdvice);
+  const finalResponse = { 
+    ...response, 
+    intent, 
+    persona, 
+    suggestions: getRandomSuggestions(3),
+    weather: weatherAdvice 
+  };
+
+  addSessionMessage('ai', finalResponse.response);
+  return finalResponse;
 }
 
 // ════════════════════════════════════════════
-// EXPERT RESPONSE ENGINE v2
+// EXPERT RESPONSE ENGINE v3 (Climate-Aware)
 // ════════════════════════════════════════════
-function generateExpertResponse(question, lang, intent, mode, profile, context) {
+function generateExpertResponse(question, lang, intent, mode, profile, context, weatherAdvice) {
   const isHi = lang === 'hi';
   const q = question.toLowerCase();
   const name = profile.name || (isHi ? 'दोस्त' : 'friend');
@@ -523,16 +551,23 @@ function generateExpertResponse(question, lang, intent, mode, profile, context) 
     };
   }
 
+  // ══════ CLIMATE ADVICE ══════
+  let climateNote = '';
+  if (weatherAdvice) {
+    climateNote = `\n\n🌤️ **Climate Tip:** ${weatherAdvice.text}\nTry: ${weatherAdvice.tags.join(', ')}`;
+  }
+
   // ══════ DEFAULT ══════
   const topFoods = dietFoods.sort((a, b) => (b.protein / b.cal) - (a.protein / a.cal)).slice(0, 4);
   return {
     response: (isHi
       ? `🌿 **Bharat Health AI:**\n\n${name}${loc ? ` (${loc})` : ''}, main samajh gaya!\n\n`
       : `🌿 **Bharat Health AI:**\n\n${name}${loc ? ` (${loc})` : ''}, I got it!\n\n`) +
-      `🏆 **Best Foods:**\n${topFoods.map(f => `• ${f.name} — ${f.cal} kcal, ${f.protein}g P`).join('\n')}\n\n` +
+      `🏆 **Best Foods:**\n${topFoods.map(f => `• ${f.name} — ${f.cal} kcal, ${f.protein}g P`).join('\n')}\n` +
+      climateNote + 
       (isHi
-        ? `📋 **Puchho:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator aur Meal Planner sidebar mein hain!`
-        : `📋 **Try asking:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator and Meal Planner in the sidebar!`) +
+        ? `\n\n📋 **Puchho:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator aur Meal Planner sidebar mein hain!`
+        : `\n\n📋 **Try asking:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator and Meal Planner in the sidebar!`) +
       recurringNote,
     sources: topFoods.slice(0, 3).map(f => ({ food: f.name, calories: f.cal, protein: f.protein, carbs: f.carbs, fat: f.fat })),
     model: 'expert-general'
