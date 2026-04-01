@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Zap, CloudSun, Thermometer, Wind, BrainCircuit } from 'lucide-react';
+import { Zap, BrainCircuit, Heart, Activity } from 'lucide-react';
 import { t } from '../utils/i18n';
 import SuggestedPrompts from './SuggestedPrompts';
 import Typewriter from './Typewriter';
+import HealthScoreCircle from './HealthScoreCircle';
 
 const WeatherBanner = ({ weather }) => {
   if (!weather) return null;
@@ -12,18 +13,20 @@ const WeatherBanner = ({ weather }) => {
     warming: 'bg-orange-50/50 border-orange-100 text-orange-700',
     balanced: 'bg-emerald-50/50 border-emerald-100 text-emerald-700'
   };
+
+  const emoji = weather.type === 'cooling' ? '☀️' : weather.type === 'comfort' ? '☔' : '❄️';
   
   return (
-    <div className={`weather-banner flex items-center gap-3 p-3 rounded-xl border mb-3 animate-in fade-in zoom-in duration-500 ${colors[weather.type] || colors.balanced}`}>
-      <div className="p-2 bg-white/80 rounded-lg shadow-sm">
-        <CloudSun size={18} />
+    <div className={`weather-banner flex items-center gap-3 p-3 rounded-2xl border mb-3 animate-in fade-in zoom-in duration-500 shadow-sm ${colors[weather.type] || colors.balanced}`}>
+      <div className="p-2 bg-white/80 rounded-xl shadow-sm text-lg animate-float-cute">
+        {emoji}
       </div>
       <div>
-        <p className="text-sm font-medium leading-tight">{weather.text}</p>
+        <p className="text-sm font-bold leading-tight">{weather.text}</p>
         <div className="flex gap-2 mt-1">
           {weather.tags.map((tag, i) => (
-            <span key={i} className="text-[10px] uppercase font-bold tracking-tighter opacity-70">
-               • {tag}
+            <span key={i} className="text-[10px] uppercase font-black tracking-wider opacity-60">
+               {tag}
             </span>
           ))}
         </div>
@@ -154,6 +157,12 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
                   )}
                 </div>
                 {msg.weather && <WeatherBanner weather={msg.weather} />}
+                {msg.intent === 'score' && !analyzingIndex && (
+                  <div className="grid grid-cols-2 gap-4 my-4">
+                    <HealthScoreCircle score={8.2} label="Protein" color="#3b82f6" />
+                    <HealthScoreCircle score={7.5} label="Consistency" color="#10b981" />
+                  </div>
+                )}
                 {msg.sources && msg.sources.length > 0 && (
                   <>
                     <div className="msg-sources">
