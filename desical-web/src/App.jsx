@@ -29,6 +29,18 @@ function App() {
   const [activeView, setActiveView] = useState('chat');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [profile, setProfile] = useState(getProfile());
+  const [weatherStatus, setWeatherStatus] = useState(null);
+
+  // Fetch weather on mount
+  useEffect(() => {
+    import('./utils/weather').then(w => {
+      w.getLocalWeather(profile.location || '').then(data => {
+        if (data) {
+          setWeatherStatus(w.getWeatherAdvice(data));
+        }
+      });
+    });
+  }, [profile.location]);
 
   // Check if user needs onboarding
   useEffect(() => {
@@ -74,6 +86,9 @@ function App() {
         model: data.model || 'unknown',
         intent: data.intent || intent,
         persona: data.persona || persona,
+        weather: data.weather,
+        reminders: data.reminders,
+        suggestions: data.suggestions
       }]);
     } catch (err) {
       setMessages(prev => [...prev, {
@@ -168,9 +183,17 @@ function App() {
             <Sparkles size={16} style={{ color: 'var(--accent-green)' }} />
             {t(lang, VIEW_TITLES[activeView] || 'brand')}
             {profile.name && activeView === 'chat' && (
-              <span style={{ color: 'var(--text-dim)', fontSize: '12px', marginLeft: '8px' }}>
+              <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: '8px', fontWeight: 400 }}>
                 — {profile.name}
               </span>
+            )}
+            {weatherStatus && (
+               <div className="ml-4 px-2 py-1 bg-primary-500/10 rounded-lg flex items-center gap-2 border border-primary-500/20 animate-in fade-in slide-in-from-left-4 duration-700">
+                  <span className="text-[10px] animate-float-cute">{weatherStatus.type === 'cooling' ? '☀️' : '🌤️'}</span>
+                  <span className="text-[10px] font-bold text-primary-500 uppercase tracking-tighter">
+                    {weatherStatus.city}: {weatherStatus.temp}°C
+                  </span>
+               </div>
             )}
           </div>
           <div className="topbar-actions">
