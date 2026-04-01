@@ -4,8 +4,7 @@ import { t } from '../utils/i18n';
 import SuggestedPrompts from './SuggestedPrompts';
 import Typewriter from './Typewriter';
 import HealthScoreCircle from './HealthScoreCircle';
-import HealthReminders from './HealthReminders';
-import { getReminderSuggestions } from '../utils/reminders';
+import RemindersSection from './RemindersSection';
 
 const WeatherBanner = ({ weather }) => {
   if (!weather) return null;
@@ -90,7 +89,7 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
   useEffect(() => {
     if (messages.length > 0 && messages[messages.length - 1].role === 'ai') {
       setAnalyzingIndex(messages.length - 1);
-      const timer = setTimeout(() => setAnalyzingIndex(-1), 800); // Faster analysis for low latency
+      const timer = setTimeout(() => setAnalyzingIndex(-1), 1500); // Analysis time
       return () => clearTimeout(timer);
     }
   }, [messages.length]);
@@ -146,14 +145,13 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
                 {msg.persona && msg.role === 'ai' && <PersonaBadge persona={msg.persona} />}
                 <div className="msg-content">
                   {idx === analyzingIndex ? (
-                    <div className="flex items-center gap-1.5 min-h-[40px]">
-                      <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce" />
-                      <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                      <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                    <div className="flex items-center gap-2 text-primary-500 font-medium animate-pulse py-2">
+                       <BrainCircuit className="animate-spin-slow" size={20} />
+                       <span>Analyse time: Consulting Cognitive Engine...</span>
                     </div>
                   ) : (
                     msg.role === 'ai' && idx === messages.length - 1 ? (
-                      <Typewriter text={msg.content} speed={10} />
+                      <Typewriter text={msg.content} speed={12} />
                     ) : (
                       msg.content
                     )
@@ -166,9 +164,6 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
                     <HealthScoreCircle score={7.5} label="Consistency" color="#10b981" />
                   </div>
                 )}
-                {msg.role === 'ai' && !analyzingIndex && (
-                   <HealthReminders reminders={getReminderSuggestions(msg.profile || {})} />
-                )}
                 {msg.sources && msg.sources.length > 0 && (
                   <>
                     <div className="msg-sources">
@@ -180,6 +175,9 @@ const ChatFeed = ({ messages, loading, lang, onQuickAction, onCtaClick }) => {
                     </div>
                     <NutritionCard sources={msg.sources} />
                   </>
+                )}
+                {msg.reminders && msg.role === 'ai' && !analyzingIndex && (
+                   <RemindersSection reminders={msg.reminders} />
                 )}
                 {msg.role === 'ai' && idx === messages.length - 1 && (
                   <SuggestedPrompts suggestions={msg.suggestions} onSelect={onQuickAction} />

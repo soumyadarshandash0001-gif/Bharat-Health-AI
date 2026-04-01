@@ -16,6 +16,17 @@ import { getLocalWeather, getWeatherAdvice } from './weather';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+function getRelevantReminders(intent) {
+  const all = [
+    { type: 'water', text: 'Drink 1 glass of water 💧', time: 'Every 2 hours' },
+    { type: 'activity', text: '10-minute Brisk Walk 🚶', time: 'After every meal' },
+    { type: 'posture', text: 'Check your posture 🧘', time: 'Every hour while working' }
+  ];
+  if (intent === 'fitness') return [all[1], all[0], all[2]];
+  if (intent === 'medical') return [all[0], all[2], all[1]];
+  return all;
+}
+
 function getRandomSuggestions(intent, weather) {
   const pools = {
     general: ["How much protein is in paneer?", "What are healthy foods in Odisha?", "Suggest a budget diet plan"],
@@ -261,7 +272,7 @@ export async function chat(question, language = 'en') {
     persona, 
     suggestions: getRandomSuggestions(intent, weatherAdvice),
     weather: weatherAdvice,
-    profile // Pass profile for contextual components like reminders
+    reminders: getRelevantReminders(intent)
   };
 
   addSessionMessage('ai', finalResponse.response);
@@ -275,7 +286,6 @@ function generateExpertResponse(question, lang, intent, mode, profile, context, 
   const isHi = lang === 'hi';
   const q = question.toLowerCase();
   const name = profile.name || (isHi ? 'दोस्त' : 'friend');
-  const kindIntro = isHi ? `नमस्ते ${name}, ` : `Hello ${name}, `;
   const loc = profile.location || '';
   const goal = profile.goal || '';
   const diet = profile.diet || 'veg';
@@ -574,13 +584,13 @@ function generateExpertResponse(question, lang, intent, mode, profile, context, 
   const topFoods = dietFoods.sort((a, b) => (b.protein / b.cal) - (a.protein / a.cal)).slice(0, 4);
   return {
     response: (isHi
-      ? `🌿 **Bharat Health AI:**\n\nनमस्ते ${name}, main samajh gaya! Main aapki help karne ke liye taiyaar hoon.\n\n`
-      : `🌿 **Bharat Health AI:**\n\nHello ${name}, I understand! I'm here to support your health journey.\n\n`) +
-      `🏆 **Top Picks for You:**\n${topFoods.map(f => `• ${f.name} — ${f.cal} kcal, ${f.protein}g P`).join('\n')}\n` +
+      ? `🌿 **Bharat Health AI:**\n\n${name}${loc ? ` (${loc})` : ''}, main samajh gaya!\n\n`
+      : `🌿 **Bharat Health AI:**\n\n${name}${loc ? ` (${loc})` : ''}, I got it!\n\n`) +
+      `🏆 **Best Foods:**\n${topFoods.map(f => `• ${f.name} — ${f.cal} kcal, ${f.protein}g P`).join('\n')}\n` +
       climateNote + 
       (isHi
-        ? `\n\n📋 **Aap yeh try kar sakte hain:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator aur Meal Planner sidebar mein hain!`
-        : `\n\n📋 **You might find these helpful:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator and Meal Planner in the sidebar!`) +
+        ? `\n\n📋 **Puchho:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator aur Meal Planner sidebar mein hain!`
+        : `\n\n📋 **Try asking:**\n• "Odisha food list"\n• "Tell me about dalma"\n• "I'm feeling cold"\n• "Diabetes diet plan"\n\n💡 BMI Calculator and Meal Planner in the sidebar!`) +
       recurringNote,
     sources: topFoods.slice(0, 3).map(f => ({ food: f.name, calories: f.cal, protein: f.protein, carbs: f.carbs, fat: f.fat })),
     model: 'expert-general'
