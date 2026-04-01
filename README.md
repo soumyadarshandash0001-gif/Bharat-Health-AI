@@ -6,7 +6,14 @@
 
 ## 📌 Repository Link
 **⭐ Source Code on GitHub:** [https://github.com/soumyadarshandash0001-gif/Bharat-Health-AI](https://github.com/soumyadarshandash0001-gif/Bharat-Health-AI)
-**🚀 Live Demo (Chatbot):** [https://soumyadarshandash0001-gif.github.io/Bharat-Health-AI/](https://soumyadarshandash0001-gif.github.io/Bharat-Health-AI/)
+**🚀 Live Demo (Chatbot v3):** [https://soumyadarshandash0001-gif.github.io/Bharat-Health-AI/](https://soumyadarshandash0001-gif.github.io/Bharat-Health-AI/)
+
+## 🆕 Version 3.0 Augmented Features (Live Now!)
+- **🌡️ Live Climate Advisor**: Automatically adjusts food suggestions based on your local weather (Rainy/Hot/Cold).
+- **💬 Context-Aware Suggestions**: Get 3 interactive prompt chips after every AI response for easier follow-ups.
+- **📅 Lifestyle Reminders**: Dynamic health reminders (Water, Walks, Posture) integrated into the chat flow.
+- **✅ Healthy/⚠️ Warning Labels**: Every food item now comes with a clear diagnostic health rating.
+- **🗺️ Expanded Regional DB**: Support for all major Indian state cuisines with GI-weighted scores.
 
 ## 🏗️ Architecture
 
